@@ -13,27 +13,28 @@ resources:
         - task_key: TO_BRONZE_INGESTION
           notebook_task:
             notebook_path: /Workspace/Users/markmodla@gmail.com/RevoData -
-              Assessment/TO_BRONZE
+              Assessment/notebooks/TO_BRONZE
             source: WORKSPACE
         - task_key: TO_SILVER_CLEANING
           depends_on:
             - task_key: TO_BRONZE_INGESTION
           notebook_task:
             notebook_path: /Workspace/Users/markmodla@gmail.com/RevoData -
-              Assessment/TO_SILVER
+              Assessment/notebooks/TO_SILVER
             source: WORKSPACE
         - task_key: TO_GOLD_FINAL
           depends_on:
             - task_key: TO_SILVER_CLEANING
           notebook_task:
-            notebook_path: /Workspace/Users/markmodla@gmail.com/RevoData - Assessment/TO_GOLD
+            notebook_path: /Workspace/Users/markmodla@gmail.com/RevoData -
+              Assessment/notebooks/TO_GOLD
             source: WORKSPACE
         - task_key: TO_EXPORT_PARQUET
           depends_on:
             - task_key: TO_GOLD_FINAL
           notebook_task:
             notebook_path: /Workspace/Users/markmodla@gmail.com/RevoData -
-              Assessment/TO_EXPORT
+              Assessment/notebooks/TO_EXPORT
             source: WORKSPACE
       queue:
         enabled: true
