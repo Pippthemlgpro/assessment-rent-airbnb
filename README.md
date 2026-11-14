@@ -1,25 +1,8 @@
 # RevoData's Technical Assessment
 
-## Introduction
-
-This project provides an opportunity to demonstrate your expertise in data engineering using a real-world dataset.
-
-Imagine yourself as a successful (and rich) data engineer seeking to reinvest your earnings in Amsterdam's property market for passive income. Your objective is to purchase houses and apartments, which you plan to lease either through long-term agreements on Kamernet or short-term listings on Airbnb.
-
-As a skilled data engineer, you have already collected a dataset containing house locations and nightly prices from Airbnb and a second dataset from Kamernet.
-
 ### Goal of the Assessment
 
 The aim is to identify postcodes with investment potential and determine whether renting properties long-term through Kamernet or via Airbnb would be more profitable.
-
-## Product Development
-
-If you are applying for a non-engineering position:
-
-- Create a conceptual design of how the implementation looks like (either components or process)
-- Create a business case
-- Create a roadmap with milestones how you would deliver this implementation with a team of engineers
-- Create a storyline based on the above input to convince the customer to invest
 
 ## Engineering Deliverables
 
@@ -29,7 +12,7 @@ If you are applying for an engineering role, you must at minimum build one or mo
 - Ingest data from Airbnb (`./data/airbnb.csv`)
 - Clean both datasets
 - Identify and address any missing or improper data by designing (and implementing if time permits) a backfill
-strategy
+  strategy
 - Calculate potential revenue per property and per postal code for both rental and Airbnb sources
 - Follow the principles of the [Medallion Architecture](https://www.databricks.com/glossary/medallion-architecture#:~:text=A%20medallion%20architecture%20is%20a%20data%20design%20pattern,%28from%20Bronze%20%E2%87%92%20Silver%20%E2%87%92%20Gold%20layer%20tables%29.)
 
@@ -43,57 +26,104 @@ The following deliverables are expected as part of the project:
 - Export of datasets produced by your pipeline, formatted as Parquet files (placed in `./data/output`)
 - Pipeline job configurations (included in the `./resources` folder)
 
-We strongly recommend using Databricks. You can set up a [free trial for professional use following Express Setup](https://signup.databricks.com/) or [Databricks Free Edition](https://www.databricks.com/learn/free-edition). If you have a strong reason to use another tool, such as a local PySpark instance or a cloud service, you may do so, but please explain your reasoning.
-Please prioritise completing the minimum requirements listed above before attempting any stretch goals.
 
-### Additional guidance for Technical Instructor applicants
 
-We don't expect the same level of engineering depth or polish as we would from a dedicated Data Engineer, but you should demonstrate a solid technical foundation, a working understanding of data pipelines, and the ability to explain your implementation choices and reasoning. Focus on delivering a complete, understandable solution that addresses the core business question rather than spending time on optional extras.
+### Implementation Steps and know-how
 
-Save everything in a private Git repository and share it with us. Deliver a clean repository: remove any redundant files, replace our README with your own, and provide clear instructions for building and running your project. If unsure how to structure your repository, we recommend starting with our [RevoData Declarative Automation Bundle Templates](https://github.com/revodatanl/revo-dabs). We expect you to spend 3-4 hours on the assessment, so apply your best judgment when prioritizing tasks.
+1. Implementation follows the medallion architechture
 
-### Stretch Goals
+   1. All data lands in bronze as-is
 
-Following are a number of stretch goals of increasing difficulty that will give us an idea of how far you can go. We **do not expect** that you will be able to achieve all of these in the given time, so pick and choose whatever suits you best. It is preferable to focus on a complete and high-quality initial assessment rather than getting lost achieving these goals.
+   2. Cleaned and enrished in silver
 
-#### Level 1 / Engineer
+   3. Utilized and can be forwarded for reporting / visualization
 
-- [ ] Build a CI/CD pipeline that deploys your data pipeline
-- [ ] Run tests in your CI/CD pipeline
-- [ ] Use pre-commit hooks to ensure code quality
+2. The whole pipeline is SQL as I'm more hands on with SQL.
 
-#### Level 2 / Artist
+   1. This mirrors my experience in SQL-centric migrations, also lowers maintenance overhead for "legacy" system experts and SQL-proficient teams. Also DBR Photon engine is a nice addition even if a lot of business might not be aware of this.
 
-- [ ] Build a visualization or dashboard displaying potential revenue per postcode (rental and Airbnb)
-- [ ] Create diagrams of the data flows and of your CI/CD pipeline
+   2. Point here is the fact that I participated in migrations what was shift and lift. Those were more of a design choise rather than recreating stuff.
 
-### BONUS
+3. I wanted to include geojson data, because I never worked with one and by the looks as I checked it would enrich the data at gold hence even if it's a higher level I wanted to add this to the pipeline.
 
-#### Level 3 / Future-Proof
+## Landing
 
-- [ ] Use Lakeflow Spark Declarative Pipelines (SDP) to build your pipelines
-- [ ] Use expectations (if using SDP) or another framework (if not), to ensure data quality
-- [ ] Deploy your pipeline using Declarative Automation Bundles
+1. Even tough github is connected with DBR, files are processed in a dedicated landing volume under bronze
 
-#### Level 4 / over 9000
+   1. Dedicated volume allows DBR admins to manage the files and check them.
 
-- [ ] Load the data from `rentals.json` one record at a time with streaming ingestion
-- [ ] Update the gold layer table(s) in real time as new streaming data arrives
+   2. See when the last file arrived
 
-#### Level 5 / 10x Developer
+   3. Potetnially create streaming or a trigger for a job if a file arrives in the location
 
-- [ ] Use the `./data/geo/post_codes.geojson` geographic dataset to enrich the Airbnb data with missing postcodes
-- [ ] - or - Query an external API such as [public.opendatasoft.com](https://public.opendatasoft.com/explore/dataset/georef-netherlands-postcode-pc4/api/) to fill in the missing postcodes using a UDF
-- [ ] Use the `./data/geo/amsterdam_areas.geojson` geographic dataset for your visualization
+For my configuration the files should land here and the pipeline triggers afterwards potetnially loading the latest files.
 
-## Review
+## Bronze
 
-Once you have completed this project, we will review it together. We are paying special attention to what you did or how you approached the pipeline logic and the challenges you addressed when issues arose. With the data provided, we expect some challenges, so we encourage creative workarounds and proactive measures.
+1. Bronze contains the files loaded as-is. Nothing changed apart from timestamp addition to see when it got loaded along with source file.
 
-As a note on using AI tools (ChatGPT, Copilot, etc.), we encourage you to use these tools to enhance your productivity. However, please remember that you are 100% responsible for the code you submit. You need to be able to explain how the code works and discuss the pros and cons of your implementations.
+   1. aribnb preserved as string to ensure all data arrives.
 
-We also require you to submit a (Markdown) export of the AI tool session conversation(s) that you conducted while completing this assignment, to better understand your working process.
+   2. JSON is exploded a little to flatten out data.
 
-Please do **not** use AI assistants in any way during the interview. We want to assess your technical skills, problem-solving abilities, and communication skills. Additionally, we want to evaluate your ability to clearly and concisely explain your thoughts.
+2. Notebook use full refresh / recreate instead of append only or incremental load due to my experience on multiple other projects. Clients I used to worked with loved to recreate everything to make sure all data is updated instead of adding logic to ensure proper incremental loading. Also landing the files (if not every 10 minutes or so) would be okay to have this. (If file is hundreds or millions of records definietly avoid this.)
 
-**Good luck, and see you on the other side!**
+## Silver
+
+1. Data is cleaned, deduplicated, enriched with geo data and fixed for downstream reporting.
+
+   1. Utilized regex to find data patterns 
+
+   2. Aligned airbnb and rentals data postal codes and rooms sizes 
+
+   3. Flagged a bunch of stuff simply to ensure flag level filtering if needed for gold.(Some of the clients I worked with loved to redesigns their dashboards every other week. Business issue? Yes. Flagging the data so easier to modify the dashbaord? Yes.)
+
+## Gold
+
+1. As rental and airbnb data is now somewhat aligned, 1-1 comparison can be done.
+
+   1. rentals tipically houses, airbnb tipically rooms. Some areas would be better to have rentals for long term some would be better for airbnb depending on size and cost. This has been categorized.
+
+2. Variables used in case something needs to be chnaged. Based on Gemini, starting 2026 april some law would be enforced in Amsterdam rentals but since the data is from 2020 tops, I would not feel fair to take this into account. Can be done tough. 
+
+3. Same for revenue scenarios in case occupancy statistics changes over time.
+
+4. As data is getting paired the reporting layer would show as insufficient data in order to have at least an insight what is happening.
+
+5. Tables are used for faster data feeding to viz tools. View is present for PC6 codes in case *more* details are needed.
+
+## Export
+
+1. Exporting the files as it was required. 
+
+2. Also, nice to have an export *for a disaster recovery too*. (Obviously if for any reason time travel is not sufficient) My experience - sadly - is the fact that many DR drills utilize copies to an extrernal storage.
+
+## Pipeline
+
+1. Simple DBR job which calls the notebooks one by one.
+
+   1. Easier to understand what is going on.
+
+   2. Where the data ends up if something is wrong.
+
+   3. Alerts configured.
+
+   4. Starts when a new file lands. If at all.
+
+## AI usage
+
+No Claude code was utilized for this assessment (Maybe it's obvious) because I wanted to understand the business logic instead of reading a wall of text if a decision is required. 
+
+Gemini Notebook was the main tool to use. Have a context and chat there about the tasks at hand. Coding, domain knowledge if needed etc. Export uploaded.
+
+Code is AI written and looked over during implementation.
+
+Documentation is hand crafted with AI overlook to not miss anything as implementation created. It's time consuming but 1. I was a librarian. 2. Good documentation is the pillar of AI usage at a company. (Where documentation is present at all.)
+
+## Known bottlenecks
+
+1. Same File names could cause issues in landing if the content is different. 
+
+2. Header change in .csv or in json tree would lead bronze to major schema issues. But eventually stop and silver.
+
+3. Regex utilization. Fragile in case business logic changes or source data changes.
