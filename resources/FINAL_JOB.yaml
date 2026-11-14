@@ -1,0 +1,40 @@
+resources:
+  jobs:
+    FINAL_JOB:
+      name: FINAL_JOB
+      email_notifications:
+        on_failure:
+          - markmodla@gmail.com
+      trigger:
+        pause_status: UNPAUSED
+        file_arrival:
+          url: /Volumes/workspace/bronze/bronze_feeding/
+      tasks:
+        - task_key: TO_BRONZE_INGESTION
+          notebook_task:
+            notebook_path: /Workspace/Users/markmodla@gmail.com/RevoData -
+              Assessment/TO_BRONZE
+            source: WORKSPACE
+        - task_key: TO_SILVER_CLEANING
+          depends_on:
+            - task_key: TO_BRONZE_INGESTION
+          notebook_task:
+            notebook_path: /Workspace/Users/markmodla@gmail.com/RevoData -
+              Assessment/TO_SILVER
+            source: WORKSPACE
+        - task_key: TO_GOLD_FINAL
+          depends_on:
+            - task_key: TO_SILVER_CLEANING
+          notebook_task:
+            notebook_path: /Workspace/Users/markmodla@gmail.com/RevoData - Assessment/TO_GOLD
+            source: WORKSPACE
+        - task_key: TO_EXPORT_PARQUET
+          depends_on:
+            - task_key: TO_GOLD_FINAL
+          notebook_task:
+            notebook_path: /Workspace/Users/markmodla@gmail.com/RevoData -
+              Assessment/TO_EXPORT
+            source: WORKSPACE
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED
